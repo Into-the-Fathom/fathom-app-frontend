@@ -35,13 +35,13 @@ const DashboardContent = observer(() => {
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} md={8} lg={6}>
-        <ProtocolStats />
+        {/* <ProtocolStats /> */}
       </Grid>
       <Grid item xs={12} md={8} lg={6}>
         <PoolsListView />
       </Grid>
       <Grid item xs={12}>
-        <OpenPositionsList />
+        {/* <OpenPositionsList /> */}
       </Grid>
     </Grid>
   );

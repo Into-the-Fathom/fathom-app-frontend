@@ -166,8 +166,8 @@ const OpenNewPositionDialog: FC<PoolProps> = ({ pool, onClose }) => {
     setCollateralAvailableToWithdraw(+collatralAvailableToWithdraw);
 
     // PRICE OF COLLATERAL FROM DEX
-    const priceOfCollateralFromDex =
-      pool.name === "USDT" ? 10 ** 18 : await poolStore.getDexPrice(pool.collateralContractAddress);
+    const priceOfCollateralFromDex = 10 ** 18 
+      //pool.name === "USDT" ? 10 ** 18 : await poolStore.getDexPrice(pool.collateralContractAddress);
 
     // DEBT RATIO
     const debtRatio =
@@ -387,6 +387,10 @@ const OpenNewPositionDialog: FC<PoolProps> = ({ pool, onClose }) => {
                   Approve {pool.name}
                 </Button>
               ) : null}
+
+                <Button onClick={approve} variant="outlined">
+                  Approve {pool.name}
+                </Button>
 
               <Button
                 onClick={openNewPosition}

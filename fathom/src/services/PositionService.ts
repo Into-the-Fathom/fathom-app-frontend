@@ -59,6 +59,16 @@ export default class PositionService implements IPositionService {
           toWei(fathomToken.toString(), "ether"),
           "1",
           encodedResult,
+
+          // "0x7F402c0928f0d47Ac10D2ce34d60D9B271343e1B",
+          // "0x64761dA24202Da160eC7FeBc2338c3CCb600b5cf",
+          // "0x60D00c5CEB25ee50b13B33B2dd52A2F0E3036951",
+          // "0x47E5E2227274aa9fa996d60b0DE9baD4602a65A2",
+          // "0x5758444300000000000000000000000000000000000000000000000000000000",
+          // "100000000000000000000",
+          // "1000000000000000000",
+          // "1",
+          // encodedResult,
         ]);
 
       await wallet.methods
