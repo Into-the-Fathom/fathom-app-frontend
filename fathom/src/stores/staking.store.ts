@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { RootStore } from ".";
-import IStakingService from "../services/interfaces/IStakingService";
-import ILockPosition from "./interfaces/ILockPosition";
+import IStakingService from "services/interfaces/IStakingService";
+import ILockPosition from "stores/interfaces/ILockPosition";
 
 export default class StakingStore {
   lockPositions: ILockPosition[] = [];
@@ -62,10 +62,6 @@ export default class StakingStore {
         chainId,
         this.rootStore.transactionStore
       );
-
-      // await this.fetchLockPositionAfterUnlock(lockId,account, chainId)
-
-      //   await this.fetchAll(account,chainId)
     } catch (e) {
       this.rootStore.alertStore.setShowErrorAlert(
         true,
@@ -85,10 +81,6 @@ export default class StakingStore {
         chainId,
         this.rootStore.transactionStore
       );
-
-      //    await this.fetchLockPositionAfterUnlock(lockId,account, chainId)
-
-      //    await this.fetchAll(account,chainId)
     } catch (e) {
       this.rootStore.alertStore.setShowErrorAlert(
         true,
@@ -135,8 +127,6 @@ export default class StakingStore {
         chainId,
         this.rootStore.transactionStore
       );
-
-
 
       //      await this.fetchAll(account,chainId)
     } catch (e) {
@@ -237,14 +227,12 @@ export default class StakingStore {
 
   fetchLockPositionAfterUnlock = async (lockId: number) => {
     let latestLockId = this.lockPositions.length;
-
     if (latestLockId > 1) {
-      console.log("........", latestLockId);
-
       let lockPosition = this.lockPositions[latestLockId - 1];
       lockPosition.lockId = lockId;
       this.lockPositions[lockId - 1] = lockPosition;
       this.lockPositions.pop();
+      this.setTotalStakedPosition(this.lockPositions);
     } else {
       this.lockPositions.pop();
     }

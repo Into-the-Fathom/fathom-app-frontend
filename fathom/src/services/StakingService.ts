@@ -1,16 +1,16 @@
-import { SmartContractFactory } from "../config/SmartContractFactory";
-import IStakingService from "./interfaces/IStakingService";
-import { Web3Utils } from "../helpers/Web3Utils";
+import { SmartContractFactory } from "config/SmartContractFactory";
+import IStakingService from "services/interfaces/IStakingService";
+import { Web3Utils } from "helpers/Web3Utils";
 
 import ActiveWeb3Transactions from "../stores/transaction.store";
 import {
   TransactionStatus,
   TransactionType,
-} from "../stores/interfaces/ITransaction";
-import { Constants } from "../helpers/Constants";
-import ILockPosition from "../stores/interfaces/ILockPosition";
-import { Strings } from "../helpers/Strings";
-import { secondsToTime } from "../utils/secondsToTime";
+} from "stores/interfaces/ITransaction";
+import { Constants } from "helpers/Constants";
+import ILockPosition from "stores/interfaces/ILockPosition";
+import { Strings } from "helpers/Strings";
+import { secondsToTime } from "utils/secondsToTime";
 
 export default class StakingService implements IStakingService {
   chainId = 51;
@@ -23,13 +23,6 @@ export default class StakingService implements IStakingService {
   ): Promise<void> {
     chainId = chainId || this.chainId;
     if (chainId) {
-      console.log("HERE1");
-      console.log("SmartContractFactory.Staking(this.chainId).address:  ");
-      console.log(SmartContractFactory.Staking(chainId).address);
-
-      console.log("Constants.WeiPerWad.multipliedBy(stakePosition).toString()");
-      console.log(Constants.WeiPerWad.multipliedBy(stakePosition).toString());
-
       return new Promise(async (resolve, reject) => {
         try {
           const Staking = Web3Utils.getContractInstance(
