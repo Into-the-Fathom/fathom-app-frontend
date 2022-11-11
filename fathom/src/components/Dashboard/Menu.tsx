@@ -1,22 +1,26 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FC } from "react";
-import {
-  AddBox as AddBoxIcon,
-  DensitySmall as DensitySmallIcon,
-} from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
-import AppMenuItem from "../MenuItem/AppMenuItem";
+import AppMenuItem from "components/MenuItem/AppMenuItem";
 
-import BorrowIconSrc from "../../assets/svg/borrow.svg";
-import BorrowIconActiveSrc from "../../assets/svg/borrow-active.svg";
-import SwapIconSrc from "../../assets/svg/stable-swap.svg";
-import SwapIconActiveSrc from "../../assets/svg/stable-swap-active.svg";
-import StakingIconSrc from "../../assets/svg/staking.svg";
-import StakingIconActiveSrc from "../../assets/svg/staking-active.svg";
+import BorrowIconSrc from "assets/svg/borrow.svg";
+import BorrowIconActiveSrc from "assets/svg/borrow-active.svg";
+import SwapIconSrc from "assets/svg/stable-swap.svg";
+import SwapIconActiveSrc from "assets/svg/stable-swap-active.svg";
+import StakingIconSrc from "assets/svg/staking.svg";
+import StakingIconActiveSrc from "assets/svg/staking-active.svg";
+import GovernanceSrc from "assets/svg/governance.svg";
+import GovernanceActiveSrc from "assets/svg/governance-active.svg";
 import { Icon } from "@mui/material";
+import { styled } from "@mui/material/styles";
+
+const MenuIcon = styled(Icon)(({ theme }) => ({
+  marginTop: "-3px",
+}));
 
 type ItemPropsType = {
   open: boolean;
+  isMobile: boolean;
 };
 
 const useShowText = (open: boolean) => {
@@ -37,7 +41,7 @@ const useShowText = (open: boolean) => {
   };
 };
 
-export const Menu: FC<ItemPropsType> = ({ open }) => {
+export const Menu: FC<ItemPropsType> = ({ open, isMobile }) => {
   const location = useLocation();
 
   const isDashboardActive = useMemo(
@@ -48,12 +52,8 @@ export const Menu: FC<ItemPropsType> = ({ open }) => {
     () => location.pathname === "/swap",
     [location.pathname]
   );
-  const isProposalsActive = useMemo(
-    () => location.pathname === "/proposals",
-    [location.pathname]
-  );
-  const isMakeProposalActive = useMemo(
-    () => location.pathname === "/proposal/make-proposal",
+  const isGovernanceActive = useMemo(
+    () => location.pathname === "/governance",
     [location.pathname]
   );
   const isStakingActive = useMemo(
@@ -63,82 +63,80 @@ export const Menu: FC<ItemPropsType> = ({ open }) => {
 
   const { showText } = useShowText(open);
 
-  const BorrowIcon = useCallback(
+  const FxdIcon = useCallback(
     () => (
-      <Icon>
+      <MenuIcon>
         <img
           src={isDashboardActive ? BorrowIconActiveSrc : BorrowIconSrc}
           alt="borrow-icon"
         />
-      </Icon>
+      </MenuIcon>
     ),
     [isDashboardActive]
   );
 
   const SwapIcon = useCallback(
     () => (
-      <Icon>
+      <MenuIcon>
         <img
           src={isStableSwapActive ? SwapIconActiveSrc : SwapIconSrc}
           alt="swap-icon"
         />
-      </Icon>
+      </MenuIcon>
     ),
     [isStableSwapActive]
   );
 
-  const Staking = useCallback(
+  const StakingIcon = useCallback(
     () => (
-      <Icon>
+      <MenuIcon>
         <img
           alt="staking-icon"
           src={isStakingActive ? StakingIconActiveSrc : StakingIconSrc}
         />
-      </Icon>
+      </MenuIcon>
     ),
     [isStakingActive]
   );
 
+  const GovernanceIcon = useCallback(
+    () => (
+      <MenuIcon sx={{ marginTop: "-9px" }}>
+        <img
+          alt="governance-icon"
+          src={isGovernanceActive ? GovernanceActiveSrc : GovernanceSrc}
+        />
+      </MenuIcon>
+    ),
+    [isGovernanceActive]
+  );
+
   const appMenuItems = [
     {
-      name: "Borrow",
+      name: "FXD",
       link: "/",
-      Icon: BorrowIcon,
+      Icon: FxdIcon,
       isActive: isDashboardActive,
-      showText,
+      showText: isMobile ? false : showText,
     },
     {
       name: "Stable Swap",
       link: "/swap",
       Icon: SwapIcon,
       isActive: isStableSwapActive,
-      showText,
+      showText: isMobile ? false : showText,
     },
     {
       name: "Governance",
-      isActive: false,
-      showText,
-      items: [
-        {
-          name: "View all Proposals",
-          showText,
-          Icon: DensitySmallIcon,
-          isActive: isProposalsActive,
-          link: "/proposals",
-        },
-        {
-          name: "Make a Proposal",
-          Icon: AddBoxIcon,
-          showText,
-          isActive: isMakeProposalActive,
-          link: "/proposal/make-proposal",
-        },
-      ],
+      link: "/governance",
+      showText: isMobile ? false : showText,
+      Icon: GovernanceIcon,
+      isActive: isGovernanceActive,
     },
     {
       name: "Staking",
-      showText,
-      Icon: Staking,
+      showText: isMobile ? false : showText,
+      Icon: StakingIcon,
       isActive: isStakingActive,
       link: "/staking",
     },

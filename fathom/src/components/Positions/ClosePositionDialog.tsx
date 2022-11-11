@@ -1,225 +1,265 @@
-import React from "react";
-import Button from "@mui/material/Button";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
-import Typography from "@mui/material/Typography";
+import React, { FC, ReactNode } from "react";
 import {
-  Container,
-  FormControl,
+  DialogContent,
+  Typography,
+  Box,
+  Divider,
   Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
-import { useStores } from "../../stores";
-import useMetaMask from "../../hooks/metamask";
-import IOpenPosition from "../../stores/interfaces/IOpenPosition";
-import { Constants } from "../../helpers/Constants";
-import { AppDialog } from "../AppComponents/AppDialog/AppDialog";
+import IOpenPosition from "stores/interfaces/IOpenPosition";
+import { AppDialog } from "components/AppComponents/AppDialog/AppDialog";
+import {
+  ButtonPrimary,
+  ButtonSecondary,
+  ClosePositionRepayTypeWrapper,
+  MaxButton,
+  OpenPositionsButtonsWrapper,
+  RepayTypeButton,
+} from "components/AppComponents/AppButton/AppButton";
+import { AppList } from "components/AppComponents/AppList/AppList";
+import {
+  ClosePositionError,
+  ClosePositionErrorMessage,
+  InfoLabel,
+  InfoValue,
+  InfoWrapper,
+  Summary,
+  WalletBalance,
+} from "components/AppComponents/AppBox/AppBox";
+import {
+  AppFormInputLogo,
+  AppFormInputWrapper,
+  AppFormLabel,
+  AppTextField,
+} from "components/AppComponents/AppForm/AppForm";
+import InfoIcon from "@mui/icons-material/Info";
+import { getTokenLogoURL } from "utils/tokenLogo";
+import useClosePosition, { ClosingType } from "hooks/useClosePosition";
+import { AppDialogTitle } from "components/AppComponents/AppDialog/AppDialogTitle";
 
 export interface DialogTitleProps {
   id: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   onClose: () => void;
 }
 
-interface ClosePositionProps {
+export type ClosePositionProps = {
   position: IOpenPosition;
-}
+  onClose: () => void;
+};
 
-enum ClosingType {
-  Full,
-  Partial,
-}
-
-const BootstrapDialogTitle = (props: DialogTitleProps) => {
-  const { children, onClose, ...other } = props;
+const ClosePositionDialog: FC<ClosePositionProps> = ({ position, onClose }) => {
+  const {
+    collateral,
+    lockedCollateral,
+    price,
+    fathomToken,
+    pool,
+    closingType,
+    balance,
+    balanceError,
+    closePosition,
+    disableClosePosition,
+    handleFathomTokenTextFieldChange,
+    handleTypeChange,
+    setMax,
+  } = useClosePosition(position, onClose);
 
   return (
-    <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
-      {children}
-      {onClose ? (
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      ) : null}
-    </DialogTitle>
+    <AppDialog
+      onClose={onClose}
+      aria-labelledby="customized-dialog-title"
+      open={true}
+      fullWidth
+      maxWidth="md"
+      color="primary"
+    >
+      <AppDialogTitle id="customized-dialog-title" onClose={onClose}>
+        Close Position
+      </AppDialogTitle>
+
+      <DialogContent>
+        <Grid container>
+          <Grid item xs={6}>
+            <AppList sx={{ width: "100%" }}>
+              <ListItem
+                alignItems="flex-start"
+                secondaryAction={
+                  <>
+                    {(lockedCollateral * price).toFixed(6)} FXD{" "}
+                    <Box component="span" sx={{ color: "#29C20A" }}>
+                      → {(lockedCollateral * price - fathomToken).toFixed(6)}{" "}
+                      FXD
+                    </Box>
+                  </>
+                }
+              >
+                <ListItemText primary="FXD Borrowed" />
+              </ListItem>
+              <ListItem
+                alignItems="flex-start"
+                secondaryAction={
+                  <>
+                    {lockedCollateral.toFixed(6)} {pool.name}{" "}
+                    <Box component="span" sx={{ color: "#29C20A" }}>
+                      → {(lockedCollateral - +collateral).toFixed(6)}{" "}
+                      {pool.name}
+                    </Box>
+                  </>
+                }
+              >
+                <ListItemText primary="Collateral Locked" />
+              </ListItem>
+              <ListItem
+                alignItems="flex-start"
+                secondaryAction={`${position.ltv.toNumber() / 10}%`}
+              >
+                <ListItemText primary="LTV (Loan-to-Value)" />
+              </ListItem>
+              <ListItem
+                alignItems="flex-start"
+                secondaryAction={`1 FXD = ${1 / price} ${pool.name}`}
+              >
+                <ListItemText primary="Liquidation Price" />
+              </ListItem>
+            </AppList>
+          </Grid>
+          <Divider
+            sx={{ margin: "10px 0 0 0" }}
+            orientation="vertical"
+            flexItem
+          ></Divider>
+          <Grid
+            item
+            sx={{
+              paddingLeft: "20px",
+              width: "calc(50% - 1px)",
+              position: "relative",
+            }}
+          >
+            <Summary>Summary</Summary>
+            <ClosePositionRepayTypeWrapper>
+              <RepayTypeButton
+                sx={{ marginRight: "5px" }}
+                className={`${
+                  closingType === ClosingType.Full ? "active" : null
+                }`}
+                onClick={() => handleTypeChange(ClosingType.Full)}
+              >
+                Repay entirely
+              </RepayTypeButton>
+              <RepayTypeButton
+                className={`${
+                  closingType === ClosingType.Partial ? "active" : null
+                }`}
+                onClick={() => handleTypeChange(ClosingType.Partial)}
+              >
+                Repay partially
+              </RepayTypeButton>
+            </ClosePositionRepayTypeWrapper>
+            <Box sx={{ marginBottom: "20px" }}>
+              <Box
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "10px",
+                  textTransform: "uppercase",
+                  color: "#9FADC6",
+                }}
+              >
+                Total debt:
+              </Box>
+              <Box sx={{ fontWeight: "bold", fontSize: "14px" }}>
+                {lockedCollateral * price} FXD
+              </Box>
+            </Box>
+            <AppFormInputWrapper>
+              <AppFormLabel>Repaying</AppFormLabel>
+              {balance ? (
+                <WalletBalance>
+                  Wallet Available: {+balance / 10 ** 18} FXD
+                </WalletBalance>
+              ) : null}
+              <AppTextField
+                error={balanceError}
+                id="outlined-helperText"
+                disabled={closingType === ClosingType.Full}
+                helperText={
+                  balanceError ? (
+                    <>
+                      <InfoIcon sx={{ float: "left", fontSize: "18px" }} />
+                      <Typography
+                        sx={{ fontSize: "12px", paddingLeft: "22px" }}
+                      >
+                        You don't have enough to repay that amount
+                      </Typography>
+                    </>
+                  ) : (
+                    "Enter the Repaying."
+                  )
+                }
+                value={fathomToken}
+                onChange={handleFathomTokenTextFieldChange}
+              />
+              <AppFormInputLogo src={getTokenLogoURL("FXD")} />
+              <MaxButton onClick={() => setMax()}>Max</MaxButton>
+            </AppFormInputWrapper>
+            <AppFormInputWrapper>
+              <AppFormLabel>Receive</AppFormLabel>
+              <AppTextField
+                disabled={true}
+                id="outlined-helperText"
+                value={collateral}
+              />
+              <AppFormInputLogo src={getTokenLogoURL(pool.name)} />
+              {/*<MaxButton disabled>Safe Max</MaxButton>*/}
+            </AppFormInputWrapper>
+            {fathomToken ? (
+              <InfoWrapper>
+                <InfoLabel>Repaying</InfoLabel>
+                <InfoValue>{fathomToken} FXD</InfoValue>
+              </InfoWrapper>
+            ) : null}
+            {fathomToken ? (
+              <InfoWrapper>
+                <InfoLabel>Receive</InfoLabel>
+                <InfoValue>
+                  {collateral} {pool.name}
+                </InfoValue>
+              </InfoWrapper>
+            ) : null}
+            {closingType === ClosingType.Full && balanceError && (
+              <ClosePositionError>
+                <InfoIcon
+                  sx={{
+                    color: "#CE0000",
+                    float: "left",
+                    marginRight: "10px",
+                  }}
+                />
+                <ClosePositionErrorMessage>
+                  Wallet balance is not enough to close this position entirely
+                  (repay in full).
+                </ClosePositionErrorMessage>
+              </ClosePositionError>
+            )}
+            <OpenPositionsButtonsWrapper
+              sx={{ position: "static", float: "right", marginTop: "20px" }}
+            >
+              <ButtonSecondary onClick={onClose}>Close</ButtonSecondary>
+              <ButtonPrimary
+                onClick={closePosition}
+                disabled={balanceError || disableClosePosition}
+              >
+                Close this position
+              </ButtonPrimary>
+            </OpenPositionsButtonsWrapper>
+          </Grid>
+        </Grid>
+      </DialogContent>
+    </AppDialog>
   );
 };
 
-export default function ClosePositionDialog(
-  this: any,
-  props: ClosePositionProps
-) {
-  const rootStore = useStores();
-  const positionStore = rootStore.positionStore;
-  const poolStore = rootStore.poolStore;
-  const [open, setOpen] = React.useState(false);
-  const [collateral, setCollateral] = React.useState(0);
-  const [fathomToken, setFathomToken] = React.useState(0);
-  const [price, setPrice] = React.useState(0);
-  const [closingType, setType] = React.useState(ClosingType.Full);
-
-  const { account } = useMetaMask()!;
-
-  const pool = poolStore.getPool(props.position.pool);
-  const debtShare = props.position.debtShare
-    .div(Constants.WeiPerWad)
-    .toNumber();
-
-  const lockedColateral = props.position.lockedCollateral
-    .div(Constants.WeiPerWad)
-    .toNumber();
-
-  const closePosition = () => {
-    positionStore.partialyClosePosition(
-      props.position,
-      pool,
-      account,
-      fathomToken,
-      collateral
-    );
-    setOpen(false);
-  };
-
-  const handleClickOpen = async () => {
-    const priceWithSafetyMargin = await poolStore.getPriceWithSafetyMargin(
-      pool
-    );
-    setType(ClosingType.Full);
-    setPrice(priceWithSafetyMargin);
-    setFathomToken(debtShare);
-    setOpen(true);
-    setCollateral(lockedColateral);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handlefathomTokenTextFieldChange = (e: any) => {
-    const { value } = e.target;
-    if (isNaN(+value)) {
-      return;
-    }
-
-    setFathomToken(value);
-    setCollateral(value / price);
-  };
-
-  const handleTypeChange = (e: any) => {
-    if (e.target.value === ClosingType.Full) {
-      setFathomToken(debtShare);
-      setCollateral(lockedColateral);
-    }
-
-    setType(e.target.value);
-  };
-
-  return (
-    <>
-      <Button
-        variant="outlined"
-        onClick={handleClickOpen}
-      >
-        Close
-      </Button>
-      <AppDialog
-        onClose={handleClose}
-        aria-labelledby="customized-dialog-title"
-        open={open}
-        fullWidth
-        maxWidth="md"
-      >
-        <BootstrapDialogTitle
-          id="customized-dialog-title"
-          onClose={handleClose}
-        >
-          Close Position
-        </BootstrapDialogTitle>
-        <DialogContent dividers>
-          <Grid container spacing={2}>
-            <Grid item xs={7}>
-              <Container>
-                <Grid container spacing={2}>
-                  <Grid item xs={7}>
-                    <Typography gutterBottom>Locked Collateral</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Typography gutterBottom>{`${lockedColateral} → ${
-                      lockedColateral - +collateral
-                    } ${pool.name}`}</Typography>
-                  </Grid>
-                  <Grid item xs={7}>
-                    <Typography gutterBottom>FXD Borrowed</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Typography gutterBottom>
-                      {`${debtShare} → ${debtShare - fathomToken} FXD`}{" "}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={7}>
-                    <Typography gutterBottom>Liquidation Price</Typography>
-                  </Grid>
-                  <Grid item xs={5}>{`1 FXD = ${1 / price} ${pool.name}`}</Grid>
-                  <Grid item xs={7}>
-                    <Typography gutterBottom>LTV</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    {props.position.ltv.toNumber() / 10}%
-                  </Grid>
-                </Grid>
-              </Container>
-            </Grid>
-            <Grid item xs={5}>
-              <FormControl fullWidth>
-                <InputLabel sx={{ m: 3 }} id="closing-type"></InputLabel>
-                <Select
-                  id="closing-type-select"
-                  value={closingType}
-                  onChange={handleTypeChange}
-                >
-                  <MenuItem value={ClosingType.Full}>
-                    Close entire position
-                  </MenuItem>
-                  <MenuItem value={ClosingType.Partial}>
-                    Partialy close position
-                  </MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
-                <TextField
-                  disabled={closingType === ClosingType.Full}
-                  id="outlined-helperText"
-                  label="FXD"
-                  helperText="Enter the desired FXD."
-                  sx={{ m: 3 }}
-                  value={fathomToken}
-                  onChange={handlefathomTokenTextFieldChange}
-                />
-              </FormControl>
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={closePosition}>
-            Close
-          </Button>
-        </DialogActions>
-      </AppDialog>
-    </>
-  );
-}
+export default ClosePositionDialog;
