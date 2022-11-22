@@ -169,6 +169,13 @@ export class SmartContractFactory {
     }
   };
 
+  public static GetPositionsV2(chainId: number) {
+    return {
+      abi:GetPositionsAbi.abi as AbiItem [],
+      address:SmartContractFactory.Addresses(chainId).getPositionsV2
+    }
+  };
+
   public static StableSwapModule(chainId: number) {
     return {
       abi: StableSwapModule.abi as AbiItem[],

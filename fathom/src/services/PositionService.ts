@@ -174,7 +174,7 @@ export default class PositionService implements IPositionService {
       );
       let myPositions = await this.getPositionsForAddress(address);
       let getPositionsContract = Web3Utils.getContractInstance(
-        SmartContractFactory.GetPositions(this.chainId),
+        SmartContractFactory.GetPositionsV2(this.chainId),
         this.chainId
       );
       let response = await getPositionsContract.methods

@@ -23,8 +23,8 @@ export default class PoolService implements IPoolService {
         allowOpenPosition: true,
       },
       {
-        id: "0x555344542d535441424c45000000000000000000000000000000000000000000",
-        name: "USDT",
+        id: "0x55532b535441424c450000000000000000000000000000000000000000000000",
+        name: "US+",
         collateralContractAddress: SmartContractFactory.USDT(this.chainId)
           .address,
         CollateralTokenAdapterAddress:
