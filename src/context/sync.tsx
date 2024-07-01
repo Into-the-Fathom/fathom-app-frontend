@@ -144,18 +144,17 @@ export const SyncProvider: FC<StakingProviderType> = ({ children }) => {
      * Check if transaction block from transaction receipt has block number higher than latestBlock from Graph, if so our Graph state is not up-to-date.
      */
     let interval: ReturnType<typeof setInterval>;
-    if (
-      Number(lastTransactionBlock) >
-      Number(
-        fxdData?.indexingStatusForCurrentVersion?.chains[0]?.latestBlock?.number
-      )
-    ) {
+    const currentBloackNumer = Number(
+      fxdData?.indexingStatusForCurrentVersion?.chains[0]?.latestBlock?.number
+    );
+    console.log(`Checking sync status for block ${currentBloackNumer}`);
+    if (Number(lastTransactionBlock) >= currentBloackNumer) {
       interval = setInterval(() => {
         refetchFxd();
       }, 500);
-
       setSyncFXD(false);
     } else {
+      console.log(`Refetching the data...`);
       setSyncFXD(true);
     }
 
